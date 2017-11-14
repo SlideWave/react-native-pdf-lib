@@ -5,10 +5,11 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
 import com.tom_roush.pdfbox.pdmodel.PDPage;
-import com.tom_roush.pdfbox.util.PDFMergerUtility;
+import com.tom_roush.pdfbox.multipdf.PDFMergerUtility;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 
 /**
  * Creates a PDDocument object and applies actions from a JSON
@@ -26,21 +27,22 @@ public class PDDocumentFactory {
     }
 
             /* ----- Factory methods ----- */
-    public static PDDocument create(ReadableMap documentActions) throws NoSuchKeyException, IOException {
+    public static PDDocument create(ReadableMap documentActions) throws NoSuchKeyException, IOException, FileNotFoundException {
         PDDocument document = new PDDocument();
         PDDocumentFactory factory = new PDDocumentFactory(document, documentActions);
 
-        factory.appendDocuments(documentActions.getArray("pages"));
+        factory.appendDocuments(documentActions);
         factory.addPages(documentActions.getArray("pages"));
         return document;
     }
 
-    public static PDDocument modify(ReadableMap documentActions) throws NoSuchKeyException, IOException {
+    public static PDDocument modify(ReadableMap documentActions) throws NoSuchKeyException, IOException, FileNotFoundException {
         String path = documentActions.getString("path");
         PDDocument document = PDDocument.load(new File(path));
         PDDocumentFactory factory = new PDDocumentFactory(document, documentActions);
 
         factory.modifyPages(documentActions.getArray("modifyPages"));
+        factory.appendDocuments(documentActions);
         factory.addPages(documentActions.getArray("pages"));
         return document;
     }
@@ -59,7 +61,7 @@ public class PDDocumentFactory {
         }
     }
 
-    private void appendDocuments(ReadableMap documentActions) {
+    private void appendDocuments(ReadableMap documentActions) throws FileNotFoundException, IOException {
         PDFMergerUtility mu = new PDFMergerUtility();
         if (documentActions.hasKey("modifyPages")) {
             //this is a modify call, so we need to include the current doc first
