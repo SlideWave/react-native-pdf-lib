@@ -8,6 +8,7 @@ export type DocumentAction = {
   path: string,
   pages: PageAction[],
   modifyPages?: PageAction[],
+  appendDocuments: string[]
 };
 
 /**
@@ -17,6 +18,7 @@ export default class PDFDocument {
   document: DocumentAction = {
     path: '',
     pages: [],
+    appendDocuments: []
   };
 
   /**
@@ -84,6 +86,11 @@ export default class PDFDocument {
     return this;
   }
 
+  appendDocument = (path: string) => {
+    this.document.appendDocuments.push(path);
+  }
+
+
   write = () => {
     // console.log('Creating this PDFDocument:');
     // console.log(this.document);
@@ -93,7 +100,7 @@ export default class PDFDocument {
     if (this.document.modifyPages !== undefined) {
       return PDFLib.modifyPDF(this.document);
     }
-    if (this.document.pages.length < 1) {
+    if (this.document.pages.length < 1 && this.document.appendDocuments.length < 1) {
       return Promise.reject('PDFDocument must have at least one page!');
     }
     return PDFLib.createPDF(this.document);

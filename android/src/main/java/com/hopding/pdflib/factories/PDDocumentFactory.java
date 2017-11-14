@@ -5,6 +5,7 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
 import com.tom_roush.pdfbox.pdmodel.PDPage;
+import com.tom_roush.pdfbox.pdmodel.PDFMergerUtility;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +30,7 @@ public class PDDocumentFactory {
         PDDocument document = new PDDocument();
         PDDocumentFactory factory = new PDDocumentFactory(document, documentActions);
 
+        factory.appendDocuments(documentActions.getArray("pages"));
         factory.addPages(documentActions.getArray("pages"));
         return document;
     }
@@ -55,6 +57,22 @@ public class PDDocumentFactory {
         for(int i = 0; i < pages.size(); i++) {
             PDPageFactory.modify(document, pages.getMap(i));
         }
+    }
+
+    private void appendDocuments(ReadableMap documentActions) {
+        PDFMergerUtility mu = new PDFMergerUtility();
+        if (documentActions.hasKey("modifyPages")) {
+            //this is a modify call, so we need to include the current doc first
+            mu.addSource(this.path);
+        }
+
+        ReadableArray files = documentActions.getArray("appendDocuments");
+        for (int i = 0; i < files.size(); i++) {
+            mu.addSource(files.getString(i));
+        }
+
+        mu.setDestinationFileName(this.path);
+        mu.mergeDocuments();
     }
 
             /* ----- Static utilities ----- */
