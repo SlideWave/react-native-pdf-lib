@@ -5,7 +5,7 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
 import com.tom_roush.pdfbox.pdmodel.PDPage;
-import com.tom_roush.pdfbox.pdmodel.PDFMergerUtility;
+import com.tom_roush.pdfbox.util.PDFMergerUtility;
 
 import java.io.File;
 import java.io.IOException;
