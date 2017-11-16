@@ -64,13 +64,13 @@ public class PDDocumentFactory {
 
     private void appendDocuments(ReadableMap documentActions) throws FileNotFoundException, IOException {
         ReadableArray files = documentActions.getArray("appendDocuments");
-        if (files.size == 0) return;
+        if (files.size() == 0) return;
 
         PDFMergerUtility mu = new PDFMergerUtility();
 
         for (int i = 0; i < files.size(); i++) {
             //load each file and append
-            InputStream loadedFile = new FileInputStream(files.getString(i))
+            InputStream loadedFile = new FileInputStream(files.getString(i));
             PDDocument newDoc = PDDocument.load(loadedFile);
 
             mu.appendDocument(this.document, newDoc);
