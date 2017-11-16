@@ -8,8 +8,10 @@ import com.tom_roush.pdfbox.pdmodel.PDPage;
 import com.tom_roush.pdfbox.multipdf.PDFMergerUtility;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 /**
  * Creates a PDDocument object and applies actions from a JSON
@@ -17,7 +19,6 @@ import java.io.FileNotFoundException;
  * ones. PDDocuments can be created anew or from an existing document.
  */
 public class PDDocumentFactory {
-
     private PDDocument document;
     private String path;
 
@@ -62,25 +63,28 @@ public class PDDocumentFactory {
     }
 
     private void appendDocuments(ReadableMap documentActions) throws FileNotFoundException, IOException {
-        PDFMergerUtility mu = new PDFMergerUtility();
-        if (documentActions.hasKey("modifyPages")) {
-            //this is a modify call, so we need to include the current doc first
-            mu.addSource(this.path);
-        }
-
         ReadableArray files = documentActions.getArray("appendDocuments");
+        if (files.size == 0) return;
+
+        PDFMergerUtility mu = new PDFMergerUtility();
+
         for (int i = 0; i < files.size(); i++) {
-            mu.addSource(files.getString(i));
+            //load each file and append
+            InputStream loadedFile = new FileInputStream(files.getString(i))
+            PDDocument newDoc = PDDocument.load(loadedFile);
+
+            mu.appendDocument(this.document, newDoc);
+            this.document.save(this.path);
+
+            newDoc.close();
+            loadedFile.close();
         }
-
-        mu.setDestinationFileName(this.path);
-        mu.mergeDocuments();
     }
-
             /* ----- Static utilities ----- */
     public static String write(PDDocument document, String path) throws IOException {
         document.save(path);
         document.close();
+
         return path;
     }
 }
